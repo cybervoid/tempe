@@ -5,8 +5,28 @@ const MejorEnVo = require("./lib/MejorEnVo");
 const Transmission = require("./lib/GetTorrent");
 
 (async () => {
-    const mejorEnVo = new MejorEnVo(axios);
-    console.log(await mejorEnVo.init(cheerio));
+
+    const transmission = new Transmission();
+
+    function init() {
+        console.log("Initiating transmission server healthcheck")
+        transmission.getTransmissionStats(function (err, result) {
+            if (!err) {
+                console.log(result);
+            } else {
+                console.log("Could not contact transmission server", err);
+            }
+        });
+    }
+
+    // init();
+
+
+    const mejorEnVo = new MejorEnVo(axios, cheerio);
+    mejorEnVo.init().then((response) => {
+        console.log(response);
+    });
+    console.log(await mejorEnVo.init());
 
     // const fetchData = async (url) => {
     //     const result = await axios.get(url);
@@ -30,7 +50,6 @@ const Transmission = require("./lib/GetTorrent");
     // const transmission = new Transmission();
     // console.log("test");
     // transmission.getTransmissionStats();
-
 
 
 })();
