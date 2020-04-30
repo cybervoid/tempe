@@ -1,5 +1,6 @@
 const axios = require("axios");
 const cheerio = require('cheerio');
+require('dotenv').config();
 
 const MejorEnVo = require("./lib/MejorEnVo");
 const Transmission = require("./lib/GetTorrent");
