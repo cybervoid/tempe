@@ -1,11 +1,14 @@
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
-const axios = require("axios");
-const cheerio = require('cheerio');
-require('dotenv').config();
 
-// const MejorEnVo = require("./lib/MejorEnVo");
+require('dotenv').config();
 const Transmission = require("./lib/system/TransmissionServer");
 const Plex = require("./lib/system/Plex");
+
+//PARSERS
+const MejorEnVo = require("./lib/parsers/MejorEnVo");
+const axios = require("axios");
+const cheerio = require('cheerio');
+
 
 (async () => {
 
@@ -17,16 +20,10 @@ const Plex = require("./lib/system/Plex");
     //     console.error("Could not connect to server", err);
     // });
 
-    // client.query("/").then(function (result) {
-    //     console.log(result);
-    // }, function (err) {
-    //     console.error("Could not connect to server", err);
-    // });
-
-
     const plex = new Plex();
     const transmission = new Transmission();
 
+    //make sure essential services are reachable
     if (await plex.healthCheck() && await transmission.healthCheck()) {
 
         console.log("Script continues");
