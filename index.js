@@ -36,9 +36,16 @@ const cheerio = require('cheerio');
         console.log("Running Parser on MejorEnVo");
         const mejorEnVo = new MejorEnVo(axios, cheerio);
         mejorEnVo.init().then((response) => {
-            console.log(response);
+            response.torrents.forEach((torrent) => {
+                console.log(torrent.text);
+            });
+
+            response.pages.forEach((page) => {
+                console.log(page.url);
+            });
+
         });
-        console.log(await mejorEnVo.init());
+        // console.log(await mejorEnVo.init());
     }
 
     async function runKat() {
