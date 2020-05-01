@@ -26,18 +26,30 @@ const cheerio = require('cheerio');
     //make sure essential services are reachable
     if (await plex.healthCheck() && await transmission.healthCheck()) {
 
-        console.log("Script continues");
+        //Initiate parsers
+        runMejorEnVo();
+        // runKat();
     }
 
+    //DEFINE PARSERS
+    async function runMejorEnVo() {
+        console.log("Running Parser on MejorEnVo");
+        const mejorEnVo = new MejorEnVo(axios, cheerio);
+        mejorEnVo.init().then((response) => {
+            console.log(response);
+        });
+        console.log(await mejorEnVo.init());
+    }
+
+    async function runKat() {
+        console.log("Running Parser on Kick Ass Torrent");
+        setTimeout(function () {
+            console.log("Kick Ass Torrent finished");
+        }, 3000);
+    }
 
     // const search = await plex.search("superman");
-    // console.log("Search result", plexHealthCheck);
 
-    // const mejorEnVo = new MejorEnVo(axios, cheerio);
-    // mejorEnVo.init().then((response) => {
-    //     console.log(response);
-    // });
-    // console.log(await mejorEnVo.init());
 
     // const fetchData = async (url) => {
     //     const result = await axios.get(url);
