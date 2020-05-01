@@ -3,9 +3,9 @@ const axios = require("axios");
 const cheerio = require('cheerio');
 require('dotenv').config();
 
-const MejorEnVo = require("./lib/MejorEnVo");
-const Transmission = require("./lib/GetTorrent");
-const Plex = require("./lib/Plex");
+// const MejorEnVo = require("./lib/MejorEnVo");
+const Transmission = require("./lib/system/TransmissionServer");
+const Plex = require("./lib/system/Plex");
 
 (async () => {
 
@@ -27,17 +27,7 @@ const Plex = require("./lib/Plex");
     const plex = new Plex();
     const transmission = new Transmission();
 
-    if (await plex.healthCheck()) {
-
-
-        // transmission.getTransmissionStats(function (err, result) {
-        //     if (!err) {
-        //         console.log(result);
-        //     } else {
-        //         console.log("Could not contact transmission server", err);
-        //     }
-        // });
-
+    if (await plex.healthCheck() && await transmission.healthCheck()) {
 
         console.log("Script continues");
     }
@@ -70,10 +60,5 @@ const Plex = require("./lib/Plex");
     //
     //     // console.log($(this).text())
     // });
-
-    // const transmission = new Transmission();
-    // console.log("test");
-    // transmission.getTransmissionStats();
-
 
 })();
