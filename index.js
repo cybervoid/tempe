@@ -9,7 +9,7 @@ const MejorEnVo = require("./lib/parsers/MejorEnVo");
 const axios = require("axios");
 const cheerio = require('cheerio');
 
-
+//todo use bunyan as logger system
 (async () => {
 
     // plex.search("Anunnaki");
@@ -20,8 +20,16 @@ const cheerio = require('cheerio');
     //     console.error("Could not connect to server", err);
     // });
 
-    const plex = new Plex();
-    const transmission = new Transmission();
+    const logger = function (message, logParser = '') {
+        let today = new Date().toISOString().replace(/T/, ' ').      // replace T with a space
+            replace(/\..+/, '');
+
+        const parser = logParser ? `parser.${logParser}` : 'app.system';
+        console.log(`[${today}] ${parser}: ${message}`);
+    }
+
+    const plex = new Plex(logger);
+    const transmission = new Transmission(logger);
 
     //make sure essential services are reachable
     if (await plex.healthCheck() && await transmission.healthCheck()) {
@@ -33,19 +41,38 @@ const cheerio = require('cheerio');
 
     //DEFINE PARSERS
     async function runMejorEnVo() {
-        console.log("Running Parser on MejorEnVo");
-        const mejorEnVo = new MejorEnVo(axios, cheerio);
-        mejorEnVo.init().then((response) => {
-            response.torrents.forEach((torrent) => {
-                console.log(torrent.text);
-            });
+        const mejorEnVo = new MejorEnVo(axios, cheerio, logger);
+        mejorEnVo.log("Running Parser on MejorEnVo");
 
-            response.pages.forEach((page) => {
-                console.log(page.url);
-            });
+        //start on the main page
+        mejorEnVo.gotoPage(mejorEnVo.mainUrl)
+            .then($ => {
+                const page = mejorEnVo.processPage($);
 
-        });
-        // console.log(await mejorEnVo.init());
+                page.torrents.forEach((torrent) => {
+                    console.log(torrent.text);
+                });
+
+                //visit all found pages
+                page.pages.forEach((page) => {
+                    mejorEnVo.log(`Found page: ${page.name} visiting url: ${page.url}`);
+                    mejorEnVo.gotoPage(mejorEnVo.mainUrl + page.url)
+                        .then($ => {
+                            const subPage = mejorEnVo.processPage($);
+
+                            subPage.torrents.forEach((torrent) => {
+                                console.log(torrent.text);
+                            });
+                        })
+                        .catch(err => {
+                            mejorEnVo.log(err);
+                        });
+                });
+
+            })
+            .catch((err) => {
+                mejorEnVo.log(`Error getting page for MejorEnVo: ${err}`);
+            });
     }
 
     async function runKat() {
@@ -54,6 +81,7 @@ const cheerio = require('cheerio');
             console.log("Kick Ass Torrent finished");
         }, 3000);
     }
+
 
     // const search = await plex.search("superman");
 
