@@ -50,7 +50,24 @@ const cheerio = require('cheerio');
                 const page = mejorEnVo.processPage($);
 
                 page.torrents.forEach((torrent) => {
-                    console.log(torrent.text);
+                    //go to the torrent page and get movie info
+                    const urlTorrent = mejorEnVo.mainUrl + torrent.href;
+                    mejorEnVo.log(`Torrent found: ${torrent.text} Visiting: ${urlTorrent}`);
+                    mejorEnVo.gotoPage(urlTorrent)
+                        .then($ => {
+                            //get movie details
+                            const date = $('table span').first().parent().contents().filter(function () {
+                                return this.nodeType == 3;
+                            }).text().replace(/[\r\n]+/gm, "").trim();
+                            const titleWithYear = $('table span').eq(2).text();
+                            const title = $('table span').eq(3).text();
+                            const format = $('table span').eq(11).text();
+                            const torrent = $('table[style="margin-bottom:10px;"] a').first().attr('href');
+                            console.log(`Torrent info: ${title} format: ${format} Download link: ${torrent}`);
+                        })
+                        .catch(err => {
+                            mejorEnVo.log(`Error: ${err}`);
+                        });
                 });
 
                 //visit all found pages
