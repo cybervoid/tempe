@@ -3,6 +3,7 @@ process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
 require('dotenv').config();
 const Transmission = require("./lib/system/TransmissionServer");
 const Plex = require("./lib/system/Plex");
+const DB = require("./lib/system/DB");
 
 //PARSERS
 const MejorEnVo = require("./lib/parsers/MejorEnVo");
@@ -28,14 +29,45 @@ const cheerio = require('cheerio');
         console.log(`[${today}] ${parser}: ${message}`);
     }
 
+    logger("Initiate DB and check connection ...");
+    const db = new DB(logger);
+    // await db.runSync();
+
+    try {
+        await db.auth();
+        logger('Connection has been established to the DB successfully');
+    } catch (error) {
+        logger('Unable to connect to the database:', error);
+    }
+
     const plex = new Plex(logger);
     const transmission = new Transmission(logger);
 
     //make sure essential services are reachable
     if (await plex.healthCheck() && await transmission.healthCheck()) {
 
+        let Movie = db.movie;
+        const movies = await Movie.findAll({
+            where: {
+                Name: 'Pepe'
+            }
+        });
+
+
+        // const Movie = db.movie;
+        // Post.findAll({
+        //     where: {
+        //         authorId: 2
+        //     }
+        // });
+        // const Movie = db.movie.build({ Name: "John", Year: 2015, Quality: "BlueRay" });
+        // await Movie.save();
+
+        // await jane.save();
+        console.log(Movie.name + ' was saved to the database!');
+
         //Initiate parsers
-        runMejorEnVo();
+        // runMejorEnVo();
         // runKat();
     }
 
