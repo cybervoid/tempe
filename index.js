@@ -46,12 +46,7 @@ const cheerio = require('cheerio');
     //make sure essential services are reachable
     if (await plex.healthCheck() && await transmission.healthCheck()) {
 
-        let Movie = db.movie;
-        const movies = await Movie.findAll({
-            where: {
-                Name: 'Pepe'
-            }
-        });
+        const movies = db.Movie;
 
 
         // const Movie = db.movie;
