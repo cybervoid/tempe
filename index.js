@@ -89,13 +89,38 @@ const cheerio = require('cheerio');
                             const format = $('table span').eq(11).text();
                             const torrent = $('table[style="margin-bottom:10px;"] a').first().attr('href');
 
-                            const movie = db.Movie.create({
-                                name: title,
-                                year: date,
-                                quality: format
-                            }).catch((err) => {
-                                mejorEnVo.log('Error inserting in DB, more info: ', err);
-                            });
+                            db.Movie.findOrCreate({
+                                where: {
+                                    name: title
+                                },
+                                defaults: { // set the default properties if it doesn't exist
+                                    name: title,
+                                    year: date,
+                                    quality: format
+                                }
+                            })
+                                .then(result => {
+                                    const movie = result[0]; // boolean stating if it was created or not
+                                    const logMovieName = `movie: ${movie.name} (${movie.year}) - ${movie.format}`;
+
+                                    if (result[1]) { // false if author already exists and was not created.
+                                        mejorEnVo.log(`The ${logMovieName} was added to the Database`);
+                                    } else {
+                                        mejorEnVo.log(`Skipping ${logMovieName}, seems like it was already processed on ${movie.updatedAt}`);
+                                    }
+                                })
+                                .catch(err => {
+                                    mejorEnVo.log(err)
+                                });
+
+
+                            // const movie = db.Movie.create({
+                            //     name: title,
+                            //     year: date,
+                            //     quality: format
+                            // }).catch((err) => {
+                            //     mejorEnVo.log('Error inserting in DB, more info: ', err);
+                            // });
 
                             mejorEnVo.log(`Torrent info: ${title} format: ${format} Download link: ${torrent}`);
                         })
