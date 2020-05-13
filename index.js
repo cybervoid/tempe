@@ -46,17 +46,6 @@ const cheerio = require('cheerio');
     //make sure essential services are reachable
     if (await plex.healthCheck() && await transmission.healthCheck()) {
 
-        const Movie = db.Movie;
-        const movie = await Movie.create({
-            name: 'rafag',
-            year: 2910,
-            quality: 'DVDRip'
-        }).catch((err) => {
-            console.log('Error inserting in DB, more info: ', err);
-            return new Error("Whoops!")
-        });
-
-
         // const Movie = db.movie;
         // Post.findAll({
         //     where: {
@@ -70,7 +59,7 @@ const cheerio = require('cheerio');
         // console.log(Movie.name + ' was saved to the database!');
 
         //Initiate parsers
-        // runMejorEnVo();
+        runMejorEnVo();
         // runKat();
     }
 
@@ -99,7 +88,16 @@ const cheerio = require('cheerio');
                             const title = $('table span').eq(3).text();
                             const format = $('table span').eq(11).text();
                             const torrent = $('table[style="margin-bottom:10px;"] a').first().attr('href');
-                            console.log(`Torrent info: ${title} format: ${format} Download link: ${torrent}`);
+
+                            const movie = db.Movie.create({
+                                name: title,
+                                year: date,
+                                quality: format
+                            }).catch((err) => {
+                                mejorEnVo.log('Error inserting in DB, more info: ', err);
+                            });
+
+                            mejorEnVo.log(`Torrent info: ${title} format: ${format} Download link: ${torrent}`);
                         })
                         .catch(err => {
                             mejorEnVo.log(`Error: ${err}`);
