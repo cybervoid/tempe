@@ -38,8 +38,14 @@ const cheerio = require('cheerio');
 
     //make sure essential services are reachable
     if (await plex.healthCheck() && await transmission.healthCheck() && await db.auth()) {
-        //Initiate parsers
-        runMejorEnVo();
+        logger("Initializing parsers ...");
+        runMejorEnVo()
+            .then(() => {
+                logger("MejorEnVo parser finished")
+            })
+            .catch(err => {
+                logger(`Error with parser: MejorEnVo, more info: ${err}`)
+            });
         // runKat();
     }
 
@@ -74,29 +80,29 @@ const cheerio = require('cheerio');
                                 format = $('table span').eq(12).text();
                             }
 
-                            // db.Movie.findOrCreate({
-                            //     where: {
-                            //         name: title
-                            //     },
-                            //     defaults: { // set the default properties if it doesn't exist
-                            //         name: title,
-                            //         year: date,
-                            //         quality: format
-                            //     }
-                            // })
-                            //     .then(result => {
-                            //         const movie = result[0]; // boolean stating if it was created or not
-                            //         const logMovieName = `movie: ${movie.name} (${movie.year}) - ${movie.format}`;
-                            //
-                            //         if (result[1]) { // false if author already exists and was not created.
-                            //             mejorEnVo.log(`The ${logMovieName} was added to the Database`);
-                            //         } else {
-                            //             mejorEnVo.log(`Skipping ${logMovieName}, seems like it was already processed on ${movie.updatedAt}`);
-                            //         }
-                            //     })
-                            //     .catch(err => {
-                            //         mejorEnVo.log(err)
-                            //     });
+                            db.Movie.findOrCreate({
+                                where: {
+                                    name: title
+                                },
+                                defaults: { // set the default properties if it doesn't exist
+                                    name: title,
+                                    year: date,
+                                    quality: format
+                                }
+                            })
+                                .then(result => {
+                                    const movie = result[0]; // boolean stating if it was created or not
+                                    const logMovieName = `movie: ${movie.name} (${movie.year}) - ${movie.format}`;
+
+                                    if (result[1]) { // false if author already exists and was not created.
+                                        mejorEnVo.log(`The ${logMovieName} was added to the Database`);
+                                    } else {
+                                        mejorEnVo.log(`Skipping ${logMovieName}, seems like it was already processed on ${movie.updatedAt}`);
+                                    }
+                                })
+                                .catch(err => {
+                                    mejorEnVo.log(err)
+                                });
 
 
                             // const movie = db.Movie.create({
