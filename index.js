@@ -33,31 +33,11 @@ const cheerio = require('cheerio');
     const db = new DB(logger);
     // await db.runSync();
 
-    try {
-        await db.auth();
-        logger('Connection has been established to the DB successfully');
-    } catch (error) {
-        logger('Unable to connect to the database:', error);
-    }
-
     const plex = new Plex(logger);
     const transmission = new Transmission(logger);
 
     //make sure essential services are reachable
-    if (await plex.healthCheck() && await transmission.healthCheck()) {
-
-        // const Movie = db.movie;
-        // Post.findAll({
-        //     where: {
-        //         authorId: 2
-        //     }
-        // });
-        // const Movie = db.movie.build({ Name: "John", Year: 2015, Quality: "BlueRay" });
-        // await Movie.save();
-
-        // await jane.save();
-        // console.log(Movie.name + ' was saved to the database!');
-
+    if (await plex.healthCheck() && await transmission.healthCheck() && await db.auth()) {
         //Initiate parsers
         runMejorEnVo();
         // runKat();
@@ -86,32 +66,37 @@ const cheerio = require('cheerio');
                             }).text().replace(/[\r\n]+/gm, "").trim();
                             const titleWithYear = $('table span').eq(2).text();
                             const title = $('table span').eq(3).text();
-                            const format = $('table span').eq(11).text();
                             const torrent = $('table[style="margin-bottom:10px;"] a').first().attr('href');
+                            let format = $('table span').eq(11).text();
 
-                            db.Movie.findOrCreate({
-                                where: {
-                                    name: title
-                                },
-                                defaults: { // set the default properties if it doesn't exist
-                                    name: title,
-                                    year: date,
-                                    quality: format
-                                }
-                            })
-                                .then(result => {
-                                    const movie = result[0]; // boolean stating if it was created or not
-                                    const logMovieName = `movie: ${movie.name} (${movie.year}) - ${movie.format}`;
+                            const reg = new RegExp("Formato");
+                            if (reg.test(format)) {
+                                format = $('table span').eq(12).text();
+                            }
 
-                                    if (result[1]) { // false if author already exists and was not created.
-                                        mejorEnVo.log(`The ${logMovieName} was added to the Database`);
-                                    } else {
-                                        mejorEnVo.log(`Skipping ${logMovieName}, seems like it was already processed on ${movie.updatedAt}`);
-                                    }
-                                })
-                                .catch(err => {
-                                    mejorEnVo.log(err)
-                                });
+                            // db.Movie.findOrCreate({
+                            //     where: {
+                            //         name: title
+                            //     },
+                            //     defaults: { // set the default properties if it doesn't exist
+                            //         name: title,
+                            //         year: date,
+                            //         quality: format
+                            //     }
+                            // })
+                            //     .then(result => {
+                            //         const movie = result[0]; // boolean stating if it was created or not
+                            //         const logMovieName = `movie: ${movie.name} (${movie.year}) - ${movie.format}`;
+                            //
+                            //         if (result[1]) { // false if author already exists and was not created.
+                            //             mejorEnVo.log(`The ${logMovieName} was added to the Database`);
+                            //         } else {
+                            //             mejorEnVo.log(`Skipping ${logMovieName}, seems like it was already processed on ${movie.updatedAt}`);
+                            //         }
+                            //     })
+                            //     .catch(err => {
+                            //         mejorEnVo.log(err)
+                            //     });
 
 
                             // const movie = db.Movie.create({
@@ -122,7 +107,7 @@ const cheerio = require('cheerio');
                             //     mejorEnVo.log('Error inserting in DB, more info: ', err);
                             // });
 
-                            mejorEnVo.log(`Torrent info: ${title} format: ${format} Download link: ${torrent}`);
+                            mejorEnVo.log(`Saving Movie: Title: ${title}, Year: ${date}, format: ${format} Download link: ${torrent}`);
                         })
                         .catch(err => {
                             mejorEnVo.log(`Error: ${err}`);
@@ -130,20 +115,20 @@ const cheerio = require('cheerio');
                 });
 
                 //visit all found pages
-                page.pages.forEach((page) => {
-                    mejorEnVo.log(`Found page: ${page.name} visiting url: ${page.url}`);
-                    mejorEnVo.gotoPage(mejorEnVo.mainUrl + page.url)
-                        .then($ => {
-                            const subPage = mejorEnVo.processPage($);
-
-                            subPage.torrents.forEach((torrent) => {
-                                console.log(torrent.text);
-                            });
-                        })
-                        .catch(err => {
-                            mejorEnVo.log(err);
-                        });
-                });
+                // page.pages.forEach((page) => {
+                //     mejorEnVo.log(`Found page: ${page.name} visiting url: ${page.url}`);
+                //     mejorEnVo.gotoPage(mejorEnVo.mainUrl + page.url)
+                //         .then($ => {
+                //             const subPage = mejorEnVo.processPage($);
+                //
+                //             subPage.torrents.forEach((torrent) => {
+                //                 console.log(torrent.text);
+                //             });
+                //         })
+                //         .catch(err => {
+                //             mejorEnVo.log(err);
+                //         });
+                // });
 
             })
             .catch((err) => {
