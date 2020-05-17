@@ -63,14 +63,18 @@ const cheerio = require('cheerio');
                     //go to the torrent page and get movie info
                     const urlTorrent = mejorEnVo.mainUrl + torrent.href;
                     mejorEnVo.log(`Torrent found: ${torrent.text} Visiting: ${urlTorrent}`);
+
+                    //visit torrent's page
                     mejorEnVo.gotoPage(urlTorrent)
                         .then($ => {
                             //get movie details
 
-                            const date = $('table span').first().parent().contents().filter(function () {
-                                return this.nodeType == 3;
-                            }).text().replace(/[\r\n]+/gm, "").trim();
                             const titleWithYear = $('table span').eq(2).text();
+                            const titleRegEx = titleWithYear.match(/\((.\d*)\)/);
+                            let releaseDate = '';
+                            if (titleRegEx) {
+                                releaseDate = titleRegEx[1];
+                            }
                             const title = $('table span').eq(3).text();
                             const torrent = $('table[style="margin-bottom:10px;"] a').first().attr('href');
                             let format = $('table span').eq(11).text();
@@ -86,7 +90,7 @@ const cheerio = require('cheerio');
                                 },
                                 defaults: { // set the default properties if it doesn't exist
                                     name: title,
-                                    year: date,
+                                    year: releaseDate,
                                     quality: format
                                 }
                             })
@@ -113,7 +117,7 @@ const cheerio = require('cheerio');
                             //     mejorEnVo.log('Error inserting in DB, more info: ', err);
                             // });
 
-                            mejorEnVo.log(`Saving Movie: Title: ${title}, Year: ${date}, format: ${format} Download link: ${torrent}`);
+                            mejorEnVo.log(`Saving Movie: Title: ${title}, Year: ${releaseDate}, format: ${format} Download link: ${torrent}`);
                         })
                         .catch(err => {
                             mejorEnVo.log(`Error: ${err}`);
