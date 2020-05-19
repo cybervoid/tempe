@@ -4,6 +4,7 @@ require('dotenv').config();
 const Transmission = require("./lib/system/TransmissionServer");
 const Plex = require("./lib/system/Plex");
 const DB = require("./lib/system/DB");
+const async = require('async');
 
 //PARSERS
 const MejorEnVo = require("./lib/parsers/MejorEnVo");
@@ -55,95 +56,42 @@ const cheerio = require('cheerio');
         mejorEnVo.log("Running Parser on MejorEnVo");
 
         //start on the main page
-        mejorEnVo.gotoPage(mejorEnVo.mainUrl)
-            .then($ => {
-                const page = mejorEnVo.processPage($);
-
-                page.torrents.forEach((torrent) => {
-                    //go to the torrent page and get movie info
-                    const urlTorrent = mejorEnVo.mainUrl + torrent.href;
-                    mejorEnVo.log(`Torrent found: ${torrent.text} Visiting: ${urlTorrent}`);
-
-                    //visit torrent's page
-                    mejorEnVo.gotoPage(urlTorrent)
-                        .then($ => {
-                            //get movie details
-
-                            const titleWithYear = $('table span').eq(2).text();
-                            const titleRegEx = titleWithYear.match(/\((.\d*)\)/);
-                            let releaseDate = '';
-                            if (titleRegEx) {
-                                releaseDate = titleRegEx[1];
-                            }
-                            const title = $('table span').eq(3).text();
-                            const torrent = $('table[style="margin-bottom:10px;"] a').first().attr('href');
-                            let format = $('table span').eq(11).text();
-
-                            const reg = new RegExp("Formato");
-                            if (reg.test(format)) {
-                                format = $('table span').eq(12).text();
-                            }
-
-                            db.Movie.findOrCreate({
-                                where: {
-                                    name: title
-                                },
-                                defaults: { // set the default properties if it doesn't exist
-                                    name: title,
-                                    year: releaseDate,
-                                    quality: format
-                                }
-                            })
-                                .then(result => {
-                                    const movie = result[0]; // boolean stating if it was created or not
-                                    const logMovieName = `movie: ${movie.name} (${movie.year}) - ${movie.format}`;
-
-                                    if (result[1]) { // false if author already exists and was not created.
-                                        mejorEnVo.log(`The ${logMovieName} was added to the Database`);
-                                    } else {
-                                        mejorEnVo.log(`Skipping ${logMovieName}, seems like it was already processed on ${movie.updatedAt}`);
-                                    }
-                                })
-                                .catch(err => {
-                                    mejorEnVo.log(err)
-                                });
-
-
-                            // const movie = db.Movie.create({
-                            //     name: title,
-                            //     year: date,
-                            //     quality: format
-                            // }).catch((err) => {
-                            //     mejorEnVo.log('Error inserting in DB, more info: ', err);
-                            // });
-
-                            mejorEnVo.log(`Saving Movie: Title: ${title}, Year: ${releaseDate}, format: ${format} Download link: ${torrent}`);
-                        })
-                        .catch(err => {
-                            mejorEnVo.log(`Error: ${err}`);
-                        });
-                });
-
-                //visit all found pages
-                // page.pages.forEach((page) => {
-                //     mejorEnVo.log(`Found page: ${page.name} visiting url: ${page.url}`);
-                //     mejorEnVo.gotoPage(mejorEnVo.mainUrl + page.url)
-                //         .then($ => {
-                //             const subPage = mejorEnVo.processPage($);
-                //
-                //             subPage.torrents.forEach((torrent) => {
-                //                 console.log(torrent.text);
-                //             });
-                //         })
-                //         .catch(err => {
-                //             mejorEnVo.log(err);
-                //         });
-                // });
-
+        const pepe = await mejorEnVo.gotoPage(mejorEnVo.mainUrl)
+            .then(res => {
+                return mejorEnVo.getPageInfo(res);
             })
+            .then(mainPage => {
+                const torrentList = mainPage.torrents;
+                const promiseList = [];
+                torrentList.forEach(currTorrent => promiseList.push(mejorEnVo.gotoPage(mejorEnVo.mainUrl + currTorrent.href)));
+                return Promise.all(promiseList)
+                    .then(torrentList => {
+                        const movieList = [];
+                        torrentList.forEach(currEl => {
+                            movieList.push(mejorEnVo.getMovieInfo(currEl));
+                        })
+                        return movieList;
+                    });
+            })
+            // .then( mainPage => mejorEnVo.getMovieInfo(mainPage.torrents) )
             .catch((err) => {
                 mejorEnVo.log(`Error getting page for MejorEnVo: ${err}`);
             });
+
+        // got movie details for current torrent, save it
+        const queue = async.queue(db.saveMovie, 20);
+        queue.push(pepe, err => {
+            if (err) logger(`Error in queue to write in DB. More info: ${err}`);
+        })
+
+        function done() {
+            queue.drain = null;
+            logger('queue processed successfully');
+        };
+
+        queue.drain = done;
+
+        console.log(pepe);
     }
 
     async function runKat() {
