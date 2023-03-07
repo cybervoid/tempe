@@ -3,7 +3,7 @@ name: New-release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*'
 
 jobs:
   unit-test:
