@@ -1,8 +1,9 @@
 name: New-release
 
-push:
-  tags:
-    - 'v*.*.*'
+on:
+  push:
+    tags:
+      - 'v*.*.*'
 
 jobs:
   unit-test:
