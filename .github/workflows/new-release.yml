@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - run: echo "Este es ${{ github.event.inputs.tag }}"
+        with:
+          ref: ${{ github.event.inputs.branch_name }}
 
       - name: Commit the new tag to the config folder
         run: |
