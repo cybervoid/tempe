@@ -13,6 +13,9 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch_name }}
 
+      - name: Debugging with tmate
+        uses: mxschmitt/action-tmate@v3.14
+
       - name: Commit the new tag to the config folder
         run: |
           echo "Write new release into pmb.yml"
@@ -21,9 +24,6 @@ jobs:
           git config --global user.email 'noreply@rectanglehealth.com'
           git commit -am "Update app version"
           git push
-
-      - name: Debugging with tmate
-        uses: mxschmitt/action-tmate@v3.14
 
       - name: Update Master with the new release
         uses: peter-evans/create-pull-request@v4
