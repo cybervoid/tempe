@@ -11,19 +11,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - run: git tag ${{ github.event.inputs.tag }}
-
-      - name: Debugging with tmate
-        uses: mxschmitt/action-tmate@v3.14
-
       - name: Commit the new tag to the config folder
         run: |
           echo "Write new release into pmb.yml"
-          hash=$(git rev-list --tags --max-count=1); version=$(git describe --tags $hash); sed -i 's/APP_VERSION.*/APP_VERSION: '"$version"'/g' config/pmb.yaml
+          sed -i 's/APP_VERSION.*/APP_VERSION: '"${{ github.event.inputs.tag }}"'/g' config/pmb.yaml
           git config --global user.name 'RH DevBot'
           git config --global user.email 'noreply@rectanglehealth.com'
           git commit -am "Update app version"
           git push
+
+      - name: Debugging with tmate
+        uses: mxschmitt/action-tmate@v3.14
 
       - name: Update Master with the new release
         uses: peter-evans/create-pull-request@v4
