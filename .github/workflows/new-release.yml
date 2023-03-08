@@ -11,8 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Debugging with tmate
-        uses: mxschmitt/action-tmate@v3.14
+#      - name: Debugging with tmate
+#        uses: mxschmitt/action-tmate@v3.14
 
       - name: Commit the new tag to the config folder
         run: |
