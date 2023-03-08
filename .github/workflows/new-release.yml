@@ -11,6 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - run: echo ${{ github.event.inputs.branch_name }}
+
       - name: Commit the new tag to the config folder
         run: |
           echo "Write new release into pmb.yml"
