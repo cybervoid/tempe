@@ -10,9 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.inputs.branch_name }}
-          fetch-depth: 0
+
+      - run: git tag ${{ github.event.inputs.tag }}
 
       - name: Debugging with tmate
         uses: mxschmitt/action-tmate@v3.14
