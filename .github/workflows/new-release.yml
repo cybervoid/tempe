@@ -14,9 +14,6 @@ jobs:
           ref: ${{ github.event.inputs.branch_name }}
           fetch-depth: 0
 
-      - name: Set env
-        run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
-
       - name: Debugging with tmate
         uses: mxschmitt/action-tmate@v3.14
 
