@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - run: echo "Este es ${{ github.event.inputs.branch_name }}"
+      - run: echo "Este es ${{ github.event.inputs.tag }}"
 
       - name: Commit the new tag to the config folder
         run: |
