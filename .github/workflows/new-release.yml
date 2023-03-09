@@ -2,8 +2,8 @@ name: New-release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - 'release-**'
 
 jobs:
   unit-test:
@@ -16,17 +16,17 @@ jobs:
 #      - name: Debugging with tmate
 #        uses: mxschmitt/action-tmate@v3.14
 
-      - name: Commit the new tag to the config folder
-        run: |
-          echo "Write new release into pmb.yml"
-          sed -i 's/APP_VERSION.*/APP_VERSION: '"${{github.ref_name }}"'/g' config/pmb.yaml
-        env:
-          version: ${{ github.event.inputs.tag }}
-          
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          branch: 'master'
-          file_pattern: 'config/pmb.yaml'
+#      - name: Commit the new tag to the config folder
+#        run: |
+#          echo "Write new release into pmb.yml"
+#          sed -i 's/APP_VERSION.*/APP_VERSION: '"${{github.ref_name }}"'/g' config/pmb.yaml
+#        env:
+#          version: ${{ github.event.inputs.tag }}
+#
+#      - uses: stefanzweifel/git-auto-commit-action@v4
+#        with:
+#          branch: 'master'
+#          file_pattern: 'config/pmb.yaml'
 
 #      - name: Notify about this change via Slack
 #        uses: 8398a7/action-slack@v2
