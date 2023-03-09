@@ -27,6 +27,7 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           file_pattern: 'config/pmb.yaml'
+          push_options: --force
 
 #      - name: Notify about this change via Slack
 #        uses: 8398a7/action-slack@v2
