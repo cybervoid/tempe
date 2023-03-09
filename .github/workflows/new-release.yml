@@ -19,9 +19,6 @@ jobs:
         run: |
           echo "Write new release into pmb.yml"
           version=$( echo ${{ github.ref_name }} | cut -d'-' -f 2); sed -i 's/APP_VERSION.*/APP_VERSION: '"$version"'/g' config/pmb.yaml
-      #        env:
-      #          version: ${{ github.event.inputs.tag }}
-      #
 
       - name: Debugging with tmate
         uses: mxschmitt/action-tmate@v3.14
@@ -29,7 +26,6 @@ jobs:
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: 'master'
           file_pattern: 'config/pmb.yaml'
 
 #      - name: Notify about this change via Slack
