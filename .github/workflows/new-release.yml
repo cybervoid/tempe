@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - run: echo ${{github.ref_name }}
+      - run: echo ${{github.ref_name }} | cut -d'-' -f 2
 
 #      - name: Debugging with tmate
 #        uses: mxschmitt/action-tmate@v3.14
