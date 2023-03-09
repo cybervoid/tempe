@@ -19,7 +19,9 @@ jobs:
       - name: Commit the new tag to the config folder
         run: |
           echo "Write new release into pmb.yml"
-          version= $(${{ github.event.inputs.tag }}); sed -i 's/APP_VERSION.*/APP_VERSION: '"$version"'/g' config/pmb.yaml
+          sed -i 's/APP_VERSION.*/APP_VERSION: '"$version"'/g' config/pmb.yaml
+        env:
+          version: ${{ github.event.inputs.tag }}
           
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
