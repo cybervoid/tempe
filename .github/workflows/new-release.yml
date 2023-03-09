@@ -2,31 +2,32 @@ name: New-release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - 'release-**'
 
+env:
+  VERSION:
 jobs:
   unit-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - run: echo ${{github.ref_name }}
-
-#      - name: Debugging with tmate
-#        uses: mxschmitt/action-tmate@v3.14
+      - run: echo ${{github.ref_name }} | cut -d'-' -f 2
 
       - name: Commit the new tag to the config folder
         run: |
           echo "Write new release into pmb.yml"
-          sed -i 's/APP_VERSION.*/APP_VERSION: '"${{github.ref_name }}"'/g' config/pmb.yaml
-        env:
-          version: ${{ github.event.inputs.tag }}
-          
+          version=$( echo ${{ github.ref_name }} | cut -d'-' -f 2); sed -i 's/APP_VERSION.*/APP_VERSION: '"$version"'/g' config/pmb.yaml
+
+      #      - name: Debugging with tmate
+      #        uses: mxschmitt/action-tmate@v3.14
+
+
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: 'master'
           file_pattern: 'config/pmb.yaml'
+          push_options: --force
 
 #      - name: Notify about this change via Slack
 #        uses: 8398a7/action-slack@v2
