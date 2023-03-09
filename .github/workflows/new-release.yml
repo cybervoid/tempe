@@ -22,13 +22,13 @@ jobs:
         run: |
           echo "Write new release into pmb.yml"
           version=${{ github.ref_name }} | cut -d'-' -f 2; sed -i 's/APP_VERSION.*/APP_VERSION: '"$version"'/g' config/pmb.yaml
-#        env:
-#          version: ${{ github.event.inputs.tag }}
-#
-#      - uses: stefanzweifel/git-auto-commit-action@v4
-#        with:
-#          branch: 'master'
-#          file_pattern: 'config/pmb.yaml'
+      #        env:
+      #          version: ${{ github.event.inputs.tag }}
+      #
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: 'master'
+          file_pattern: 'config/pmb.yaml'
 
 #      - name: Notify about this change via Slack
 #        uses: 8398a7/action-slack@v2
