@@ -19,7 +19,7 @@ jobs:
       - name: Commit the new tag to the config folder
         run: |
           echo "Write new release into pmb.yml"
-          sed -i 's/APP_VERSION.*/APP_VERSION: '"$version"'/g' config/pmb.yaml
+          sed -i 's/APP_VERSION.*/APP_VERSION: '"${{github.ref_name }}"'/g' config/pmb.yaml
         env:
           version: ${{ github.event.inputs.tag }}
           
