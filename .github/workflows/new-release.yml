@@ -23,8 +23,8 @@ jobs:
       #          version: ${{ github.event.inputs.tag }}
       #
 
-      #      - name: Debugging with tmate
-      #        uses: mxschmitt/action-tmate@v3.14
+      - name: Debugging with tmate
+        uses: mxschmitt/action-tmate@v3.14
 
 
       - uses: stefanzweifel/git-auto-commit-action@v4
