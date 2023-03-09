@@ -5,6 +5,8 @@ on:
     branches:
       - 'release-**'
 
+env:
+  VERSION:
 jobs:
   unit-test:
     runs-on: ubuntu-latest
@@ -13,13 +15,13 @@ jobs:
 
       - run: echo ${{github.ref_name }} | cut -d'-' -f 2
 
-#      - name: Debugging with tmate
-#        uses: mxschmitt/action-tmate@v3.14
+      #      - name: Debugging with tmate
+      #        uses: mxschmitt/action-tmate@v3.14
 
-#      - name: Commit the new tag to the config folder
-#        run: |
-#          echo "Write new release into pmb.yml"
-#          sed -i 's/APP_VERSION.*/APP_VERSION: '"${{github.ref_name }}"'/g' config/pmb.yaml
+      - name: Commit the new tag to the config folder
+        run: |
+          echo "Write new release into pmb.yml"
+          version=${{github.ref_name }} | cut -d'-' -f 2; sed -i 's/APP_VERSION.*/APP_VERSION: '"${{github.ref_name }}"'/g' config/pmb.yaml
 #        env:
 #          version: ${{ github.event.inputs.tag }}
 #
